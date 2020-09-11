@@ -58,7 +58,7 @@ function checkFileType(file, cb) {
 }
 
 
-
+//Post an article
 router.post('/', (req, res) => {
     upload(req, res, (err) => {
         if (err) {
