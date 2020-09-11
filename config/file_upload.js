@@ -7,10 +7,12 @@ mongoose.connect("mongodb://127.0.0.1:27017/comments", {
 
 const schema = new mongoose.Schema({
     abstract: { type: String, required: true },
-    newfile: { type: String, required: true },
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    authors: { type: Array, required: true }
+    manuscript: { type: String, required: true },
+    figurefiles: { type: String, required: true },
+    graphs: { type: String, required: true },
+    coverletters: { type: String, required: true },
+    coauthors: { type: Array, required: true },
+    status: { type: String, default: "pending" }
 })
 
 module.exports = mongoose.model("file", schema);

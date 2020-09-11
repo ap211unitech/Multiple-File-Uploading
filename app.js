@@ -13,7 +13,7 @@ app.use("/uploads", express.static("./uploads"));
 app.use("/", require("./routes/file_upload"));
 
 //Run Server
-app.listen(80, () => {
+app.listen(8000, () => {
     console.log("Server running at port 80");
 });
 

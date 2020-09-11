@@ -2,6 +2,7 @@ const router = require("express").Router();
 const multer = require("multer");
 const path = require("path");
 const schema = require("../config/file_upload");
+const mongoose = require("mongoose");
 
 const storage = multer.diskStorage({
     destination: './uploads',
@@ -21,7 +22,19 @@ const upload = multer({
     maxCount: 1
 },
 {
-    name: "newfile",
+    name: "manuscript",
+    maxCount: 1
+},
+{
+    name: "figurefiles",
+    maxCount: 1
+},
+{
+    name: "graphs",
+    maxCount: 1
+},
+{
+    name: "coverletters",
     maxCount: 1
 }
 ]);
@@ -63,13 +76,25 @@ router.post('/', (req, res) => {
                 let all_files = [];
 
                 for (const key in req.files) {
-                    let obj = { [key]: "http://localhost/" + req.files[key][0].path }
+                    let obj = { [key]: "http://localhost:8000/" + req.files[key][0].path }
                     all_files.push(obj);
                 }
-                res.json({
-                    msg: 'File Uploaded!',
-                    all_files
-                });
+                let all_coauthors = req.body.coauthors.split("\n");
+                console.log(JSON.parse(all_coauthors[0].slice(1,-1)));
+
+                let article = new schema({
+                    abstract: all_files[0]["abstract"],
+                    manuscript: all_files[1]["manuscript"],
+                    figurefiles: all_files[2]["figurefiles"],
+                    graphs: all_files[3]["graphs"],
+                    coverletters: all_files[4]["coverletters"],
+                })
+                article.save()
+                    .then(() => {
+                        res.json({ article });
+                    })
+                    .catch(err => { res.json({ error: err.message }) })
+
             }
         }
     });
