@@ -10,6 +10,7 @@ const schema = new mongoose.Schema({
     manuscript: { type: String, required: true },
     figurefiles: { type: String, required: true },
     graphs: { type: String, required: true },
+    email: { type: String, required: true },
     coverletters: { type: String, required: true },
     coauthors: { type: Array, required: true },
     status: { type: String, default: "pending" }

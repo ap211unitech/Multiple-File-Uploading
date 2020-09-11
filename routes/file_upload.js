@@ -72,13 +72,12 @@ router.post('/', (req, res) => {
                 });
             } else {
                 let all_files = [];
-
                 for (const key in req.files) {
                     let obj = { [key]: "http://localhost:8000/" + req.files[key][0].path }
                     all_files.push(obj);
                 }
                 let all_coauthors = req.body.coauthors.split("\n");
-                console.log(JSON.parse(all_coauthors[1]));
+                // console.log(JSON.parse(all_coauthors[1]));
 
                 let article = new schema({
                     abstract: all_files[0]["abstract"],
@@ -86,18 +85,48 @@ router.post('/', (req, res) => {
                     figurefiles: all_files[2]["figurefiles"],
                     graphs: all_files[3]["graphs"],
                     coverletters: all_files[4]["coverletters"],
-                })
+                    email: req.body.email,
+                    coauthors: all_coauthors
+                });
                 article.save()
                     .then(() => {
                         res.json({ article });
                     })
-                    .catch(err => { res.json({ error: err.message }) })
-
+                    .catch(err => {
+                        res.json({ error: err.message })
+                    });
             }
         }
     });
 });
 
+
+//Get all articles posted by you
+router.get("/list", (req, res) => {
+    schema.find({ email: req.body.email })
+        .exec()
+        .then((doc) => {
+            const data = [];
+            doc.forEach(element => {
+                let authors = [];
+                element.coauthors.forEach(elm => {
+                    authors.push(JSON.parse(elm).name.fname)
+                });
+                data.push({
+                    Email: element.email,
+                    Abstract: element.abstract,
+                    Manuscript: element.manuscript,
+                    FigureFiles: element.figurefiles,
+                    Graphs: element.graphs,
+                    Coverletters: element.coverletters,
+                    Status: element.status,
+                    CoAuthors: authors
+                })
+            });
+            res.status(200).send(data)
+        })
+        .catch(err => { res.json({ error: err.message }) });
+})
 
 
 module.exports = router;
