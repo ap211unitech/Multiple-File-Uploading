@@ -53,11 +53,9 @@ function checkFileType(file, cb) {
     if (extname && mimetype) {
         return cb(null, true);
     } else {
-        cb('Error: jpeg/png and docs Only!');
+        cb('Error: Only jpeg/png/jpg images and txt/doc file applicable');
     }
 }
-
-
 
 
 
@@ -80,7 +78,7 @@ router.post('/', (req, res) => {
                     all_files.push(obj);
                 }
                 let all_coauthors = req.body.coauthors.split("\n");
-                console.log(JSON.parse(all_coauthors[0].slice(1,-1)));
+                console.log(JSON.parse(all_coauthors[1]));
 
                 let article = new schema({
                     abstract: all_files[0]["abstract"],
