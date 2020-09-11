@@ -110,9 +110,10 @@ router.get("/list", (req, res) => {
             doc.forEach(element => {
                 let authors = [];
                 element.coauthors.forEach(elm => {
-                    authors.push(JSON.parse(elm).name.fname)
+                    authors.push(JSON.parse(elm).name.prefix + " " + JSON.parse(elm).name.fname + " " + JSON.parse(elm).name.lname)
                 });
                 data.push({
+                    Id: element.id,
                     Email: element.email,
                     Abstract: element.abstract,
                     Manuscript: element.manuscript,
@@ -120,12 +121,72 @@ router.get("/list", (req, res) => {
                     Graphs: element.graphs,
                     Coverletters: element.coverletters,
                     Status: element.status,
-                    CoAuthors: authors
+                    CoAuthors: authors.join(", ")
                 })
             });
             res.status(200).send(data)
         })
         .catch(err => { res.json({ error: err.message }) });
+})
+
+
+//Update Article
+router.patch("/update", (req, res) => {
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({
+                msg: err
+            });
+        } else {
+            if (req.files == undefined) {
+                res.json({
+                    msg: 'Error: No File Selected!'
+                });
+            } else {
+                schema.find({ _id: req.body._id }).exec()
+                    .then((doc) => {
+                        if (doc[0].status == "pending") {
+                            let all_files = [];
+                            for (const key in req.files) {
+                                let obj = { [key]: "http://localhost:8000/" + req.files[key][0].path }
+                                all_files.push(obj);
+                            }
+                            let all_coauthors = req.body.coauthors.split("\n");
+                            schema.update({ _id: req.body._id }, {
+                                $set: {
+                                    abstract: all_files[0]["abstract"],
+                                    manuscript: all_files[1]["manuscript"],
+                                    figurefiles: all_files[2]["figurefiles"],
+                                    graphs: all_files[3]["graphs"],
+                                    coverletters: all_files[4]["coverletters"],
+                                    coauthors: all_coauthors
+                                }
+                            })
+                                .exec()
+                                .then((docs) => {
+                                    res.json({ message: "Article Updated", docs: docs });
+                                })
+                                .catch(err => {
+                                    res.json({ error: err.message });
+                                })
+                        }
+                        else {
+                            res.json({ message: "Can't be updated....Status is Not Pending" })
+                        }
+                    })
+                    .catch(err => {
+                        res.status(400).json({ error: err.message })
+                    })
+            }
+        }
+    });
+});
+
+//Deleting a Article
+router.delete("/delete", (req, res) => {
+    schema.findByIdAndDelete(req.body._id).exec()
+        .then(doc => { res.json({ message: "Article Deleted" }) })
+        .catch(err => { res.json({ message: err.message }) })
 })
 
 
